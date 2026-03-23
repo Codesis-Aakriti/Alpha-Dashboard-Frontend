@@ -1,0 +1,454 @@
+// ── Page ───────────────────────────────────────────────────
+.verify-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 70% 30%, rgba(3, 174, 204, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(3, 174, 204, 0.06) 0%, transparent 40%),
+    var(--surface-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  font-family: var(--font-primary);
+}
+
+// ── Container ──────────────────────────────────────────────
+.verify-container {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+// ── Logo ───────────────────────────────────────────────────
+.verify-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  span {
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    letter-spacing: 3px;
+    color: var(--text-primary);
+    text-transform: uppercase;
+  }
+}
+
+// ── Step Track ─────────────────────────────────────────────
+.step-track {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+
+  // connector line — sits between this circle and the next
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px; // half of circle height (30px / 2)
+    left: calc(50% + 17px);
+    right: calc(-50% + 17px);
+    height: 1.5px;
+    background: var(--border-default);
+    transition: background var(--transition-base);
+  }
+
+  &.line-done::after {
+    background: var(--accent-primary);
+    opacity: 0.5;
+  }
+}
+
+.step-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface-elevated);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  position: relative;
+  z-index: 1;
+
+  &.active {
+    border-color: var(--accent-primary);
+    background: rgba(3, 174, 204, 0.12);
+    color: var(--accent-primary);
+    box-shadow: 0 0 0 4px rgba(3, 174, 204, 0.08);
+  }
+
+  &.done {
+    border-color: var(--accent-primary);
+    background: rgba(3, 174, 204, 0.12);
+    color: var(--accent-primary);
+    opacity: 0.7;
+  }
+}
+
+.step-label {
+  margin-top: 7px;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+
+  &.active {
+    color: var(--accent-primary);
+    font-weight: var(--font-semibold);
+  }
+}
+
+// ── Card ───────────────────────────────────────────────────
+.verify-card {
+  width: 100%;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 36px 40px;
+  box-shadow: var(--shadow-lg), var(--shadow-inset);
+
+  @media (max-width: 480px) {
+    padding: 28px 24px;
+  }
+}
+
+// ── Step Content ───────────────────────────────────────────
+.step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.step-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(3, 174, 204, 0.08);
+  border: 1px solid rgba(3, 174, 204, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.step-content h2 {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+}
+
+.step-desc {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  max-width: 340px;
+
+  strong {
+    color: var(--text-primary);
+    font-weight: var(--font-semibold);
+  }
+}
+
+// ── OTP Boxes ──────────────────────────────────────────────
+.otp-boxes {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.otp-box {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  background: var(--surface-overlay);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  caret-color: var(--accent-primary);
+
+  &:focus {
+    border-color: var(--accent-primary);
+    background: rgba(3, 174, 204, 0.05);
+    box-shadow: 0 0 0 3px var(--accent-primary-subtle);
+  }
+
+  &.filled {
+    border-color: rgba(3, 174, 204, 0.4);
+    color: var(--accent-primary);
+  }
+
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 48px;
+    font-size: var(--text-lg);
+  }
+}
+
+.resend-link {
+  background: none;
+  border: none;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  padding: 0;
+
+  span {
+    color: var(--accent-primary);
+    font-weight: var(--font-semibold);
+
+    &:hover {
+      color: var(--accent-primary-hover);
+      text-decoration: underline;
+    }
+  }
+}
+
+// ── File Upload ────────────────────────────────────────────
+.file-upload {
+  width: 100%;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  margin-bottom: 14px;
+
+  &:hover {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary-muted);
+  }
+
+  &.has-file {
+    border-style: solid;
+    border-color: var(--color-success);
+    background: rgba(34, 197, 94, 0.04);
+  }
+}
+
+.file-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.upload-label {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.upload-hint {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.file-name {
+  font-size: var(--text-base);
+  color: var(--color-success);
+  font-weight: var(--font-medium);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-remove {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition-fast);
+
+  &:hover { color: var(--color-danger); }
+}
+
+// ── Info Note ──────────────────────────────────────────────
+.info-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  width: 100%;
+}
+
+// ── Doc Options ────────────────────────────────────────────
+.doc-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.doc-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  padding: 9px 14px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+// ── Submitted ──────────────────────────────────────────────
+.step-content.submitted {
+  .submitted-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+}
+
+.submitted-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.sub-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--text-base);
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+
+  &.done {
+    background: rgba(34, 197, 94, 0.06);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    color: var(--color-success);
+  }
+
+  &.pending {
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: var(--color-warning);
+  }
+}
+
+// ── Actions ────────────────────────────────────────────────
+.step-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  font-family: var(--font-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+
+  &:hover {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+}
+
+.btn-next {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: var(--accent-primary);
+  color: var(--surface-base);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
+  box-shadow: var(--shadow-glow);
+  margin-left: auto;
+
+  &:hover:not(:disabled) {
+    background: var(--accent-primary-hover);
+    box-shadow: var(--shadow-glow-strong);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}

@@ -1,0 +1,57 @@
+// ── Alpha Futures Platform Design Tokens ──────────────────
+
+// Backgrounds
+$bg-dark:       #0f0f11;
+$bg-panel:      #1a1a1d;
+$bg-card:       #1e1e22;
+$bg-input:      #141416;
+$bg-hover:      rgba(255, 255, 255, 0.04);
+
+// Borders
+$border:        rgba(255, 255, 255, 0.06);
+$border-strong: rgba(255, 255, 255, 0.12);
+
+// Text
+$text-primary:   #e8e8ea;
+$text-secondary: #7a7a8a;
+$text-muted:     rgba(255, 255, 255, 0.2);
+
+// Accents
+$accent-blue:    #1565C0;
+$accent-blue-lg: #1976D2;
+$accent-blue-glow: rgba(21, 101, 192, 0.35);
+
+// Trading colors
+$green:          #26c281;
+$green-dim:      rgba(38, 194, 129, 0.15);
+$red:            #ef4444;
+$red-dim:        rgba(239, 68, 68, 0.15);
+
+// Legacy / tournament colors (kept for tournament-specific UI)
+$ut-orange:      #BF5700;
+$alpha-purple:   #9D50BB;
+
+// Transitions
+$standard-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Mixins
+@mixin glassmorphism {
+  background: $bg-card;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid $border;
+  border-radius: 12px;
+}
+
+@mixin panel {
+  background: $bg-panel;
+  border: 1px solid $border;
+  border-radius: 8px;
+}
+
+@mixin text-gradient {
+  background: linear-gradient(135deg, $accent-blue-lg 0%, #42a5f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
