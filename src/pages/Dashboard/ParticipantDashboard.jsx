@@ -186,20 +186,22 @@ export default function ParticipantDashboard() {
                   <span className="panel-title">Recent Trades</span>
                   <span className="panel-sub">{trades.filter(t => t.status === 'open').length} open</span>
                 </div>
-                <div className="trades-table">
-                  <div className="trades-head">
-                    <span>Symbol</span><span>Side</span><span>Entry</span><span>Exit</span><span>P&L</span><span>R:R</span>
-                  </div>
-                  {trades.map(t => (
-                    <div key={t.id} className={`trade-row ${t.status === 'open' ? 'open' : ''}`}>
-                      <span className="trade-symbol">{t.symbol}</span>
-                      <span className={`trade-side ${t.side === 'Long' ? 'buy' : 'sell'}`}>{t.side}</span>
-                      <span className="trade-num">{t.entry.toFixed(2)}</span>
-                      <span className="trade-num">{t.exit ? t.exit.toFixed(2) : <span className="live-dot">●</span>}</span>
-                      <span className={`trade-pnl ${t.pnl >= 0 ? 'pos' : 'neg'}`}>{fmt(t.pnl, true)}</span>
-                      <span className="trade-rr">{t.rr}</span>
+                <div className="trades-table-wrap">
+                  <div className="trades-table">
+                    <div className="trades-head">
+                      <span>Symbol</span><span>Side</span><span>Entry</span><span>Exit</span><span>P&L</span><span>R:R</span>
                     </div>
-                  ))}
+                    {trades.map(t => (
+                      <div key={t.id} className={`trade-row ${t.status === 'open' ? 'open' : ''}`}>
+                        <span className="trade-symbol">{t.symbol}</span>
+                        <span className={`trade-side ${t.side === 'Long' ? 'buy' : 'sell'}`}>{t.side}</span>
+                        <span className="trade-num">{t.entry.toFixed(2)}</span>
+                        <span className="trade-num">{t.exit ? t.exit.toFixed(2) : <span className="live-dot">●</span>}</span>
+                        <span className={`trade-pnl ${t.pnl >= 0 ? 'pos' : 'neg'}`}>{fmt(t.pnl, true)}</span>
+                        <span className="trade-rr">{t.rr}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

@@ -233,34 +233,58 @@ export default function VerificationPage() {
             </div>
           )}
 
-          {/* Step 4 — Submitted */}
+          {/* Step 4 — Pending Approval */}
           {step === 4 && (
-            <div className="step-content submitted">
-              <div className="submitted-icon">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
+            <div className="step-content pending-approval">
+
+              {/* Status icon */}
+              <div className="pa-status-icon">
+                <div className="pa-icon-ring">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                </div>
+                <div className="pa-orbit"/>
               </div>
-              <h2>Application submitted!</h2>
-              <p className="step-desc">Your documents are under manual review. You&apos;ll receive an email once approved — typically within 24 hours.</p>
-              <div className="submitted-steps">
+
+              <h2>Application Under Review</h2>
+              <p className="step-desc">Your documents have been submitted. Our team is reviewing your identity and student verification — typically less than 24 hours.</p>
+
+              {/* Checklist */}
+              <div className="pa-checklist">
                 {[
-                  { label: 'Email verified',        status: 'done'    },
-                  { label: 'KYC submitted',          status: 'done'    },
-                  { label: 'Student ID submitted',   status: 'done'    },
-                  { label: 'Manual approval — pending', status: 'pending' },
-                ].map(item => (
-                  <div key={item.label} className={`sub-step ${item.status}`}>
-                    {item.status === 'done' ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    )}
-                    {item.label}
+                  { label: 'Email verified',          done: true  },
+                  { label: 'Identity (KYC) uploaded', done: true  },
+                  { label: 'Student ID uploaded',     done: true  },
+                  { label: 'Manual approval',         done: false },
+                ].map((item, i) => (
+                  <div key={i} className={`pa-check-item ${item.done ? 'done' : 'pending'}`}>
+                    <div className="pa-check-icon">
+                      {item.done ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      ) : (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span>{item.label}</span>
+                    {!item.done && <span className="pa-pending-tag">Pending</span>}
                   </div>
                 ))}
               </div>
+
+              {/* Info note */}
+              <div className="info-note">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                You&apos;ll receive an approval or follow-up email within 24 hours.
+              </div>
+
             </div>
           )}
 
@@ -281,6 +305,24 @@ export default function VerificationPage() {
                   <polyline points="9 18 15 12 9 6"/>
                 </svg>
               </button>
+            )}
+            {step === 4 && (
+              <>
+                <button className="btn-back" onClick={() => navigate('/auth')}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  Sign Out
+                </button>
+                <button className="btn-next" disabled title="Available once your application is approved">
+                  Go to Dashboard
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+              </>
             )}
           </div>
 

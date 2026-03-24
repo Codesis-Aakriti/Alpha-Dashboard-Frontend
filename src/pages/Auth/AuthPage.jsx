@@ -8,6 +8,31 @@ export default function AuthPage() {
   const [mode, setMode] = useState('signin')
   const [showPassword, setShowPassword] = useState(false)
 
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    username: '',
+    email: '',
+    country_code: '',
+    contact: '',
+    city: '',
+    country: '',
+    referal_code: '',
+    password: '',
+    confirm_password: '',
+  })
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log('Form submission payload:', formData)
+    navigate('/verify')
+  }
+
   return (
     <div className="auth-page">
       <div className="auth-container">
@@ -71,31 +96,62 @@ export default function AuthPage() {
           </div>
 
           {/* Form */}
-          <form className="auth-form" onSubmit={(e) => { e.preventDefault(); navigate('/verify') }}>
+          <form className="auth-form" onSubmit={handleSubmit}>
 
             {mode === 'signup' && (
-              <div className="form-row two-col">
-                <div className="form-group">
-                  <label>First Name</label>
-                  <input type="text" placeholder="John" />
+              <>
+                <div className="form-row two-col">
+                  <div className="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" placeholder="John" value={formData.first_name} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" placeholder="Doe" value={formData.last_name} onChange={handleChange} />
+                  </div>
                 </div>
+
                 <div className="form-group">
-                  <label>Last Name</label>
-                  <input type="text" placeholder="Doe" />
+                  <label>Username</label>
+                  <input type="text" name="username" placeholder="johndoe" value={formData.username} onChange={handleChange} />
                 </div>
-              </div>
+              </>
             )}
 
             <div className="form-group">
               <label>Email Address</label>
-              <input type="email" placeholder="you@utexas.edu" />
+              <input type="email" name="email" placeholder="you@utexas.edu" value={formData.email} onChange={handleChange} />
             </div>
 
             {mode === 'signup' && (
-              <div className="form-group">
-                <label>Phone Number</label>
-                <input type="tel" placeholder="+1 (555) 000-0000" />
-              </div>
+              <>
+                <div className="form-row code-phone">
+                  <div className="form-group">
+                    <label>Code</label>
+                    <input type="text" name="country_code" placeholder="+1" value={formData.country_code} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="contact" placeholder="(555) 000-0000" value={formData.contact} onChange={handleChange} />
+                  </div>
+                </div>
+
+                <div className="form-row two-col">
+                  <div className="form-group">
+                    <label>City</label>
+                    <input type="text" name="city" placeholder="Austin" value={formData.city} onChange={handleChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Country</label>
+                    <input type="text" name="country" placeholder="USA" value={formData.country} onChange={handleChange} />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Referral Code</label>
+                  <input type="text" name="referal_code" placeholder="XYZ123 (Optional)" value={formData.referal_code} onChange={handleChange} />
+                </div>
+              </>
             )}
 
             <div className="form-group">
@@ -104,7 +160,13 @@ export default function AuthPage() {
                 {mode === 'signin' && <a href="#" className="forgot-link">Forgot Password?</a>}
               </div>
               <div className="input-wrapper">
-                <input type={showPassword ? 'text' : 'password'} placeholder="••••••••" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
                 <button
                   type="button"
                   className="toggle-pw"
@@ -113,14 +175,14 @@ export default function AuthPage() {
                 >
                   {showPassword ? (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                   ) : (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
                     </svg>
                   )}
                 </button>
@@ -130,7 +192,13 @@ export default function AuthPage() {
             {mode === 'signup' && (
               <div className="form-group">
                 <label>Confirm Password</label>
-                <input type="password" placeholder="••••••••" />
+                <input
+                  type="password"
+                  name="confirm_password"
+                  placeholder="••••••••"
+                  value={formData.confirm_password}
+                  onChange={handleChange}
+                />
               </div>
             )}
 

@@ -13,6 +13,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+
+  @media (max-width: 480px) {
+    padding: 14px 12px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }
 
 .lb-title {
@@ -267,10 +273,17 @@
 .lb-table-wrap {
   flex: 1;
   overflow-y: auto;
+  overflow-x: auto;
   padding: 0 24px;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 480px) {
+    padding: 0 12px;
+  }
 
   &::-webkit-scrollbar {
     width: 4px;
+    height: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
@@ -281,6 +294,11 @@
   &::-webkit-scrollbar-track {
     background: transparent;
   }
+}
+
+// ── Table ──────────────────────────────────────────────────
+.lb-table-inner {
+  min-width: 620px;
 }
 
 // ── Table ──────────────────────────────────────────────────

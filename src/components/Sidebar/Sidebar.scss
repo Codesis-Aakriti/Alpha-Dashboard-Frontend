@@ -12,6 +12,10 @@
   left: 0;
   z-index: var(--z-sticky);
   gap: 0;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .sidebar-logo {
