@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { registerUser, loginUser } from '../../features/auth/authSlice'
 import tournamentPoster from '../../assets/tournament-poster.png'
 import './AuthPage.scss'
 
 export default function AuthPage() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { status, error } = useSelector((state) => state.auth)
   const [mode, setMode] = useState('signin')
   const [showPassword, setShowPassword] = useState(false)
 
@@ -29,13 +33,26 @@ export default function AuthPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log('Form submission payload:', formData)
-    navigate('/verify')
+
+    if (mode === 'signin') {
+      dispatch(loginUser({ email: formData.email, password: formData.password })).then((res) => {
+        if (!res.error) navigate('/dashboard') // adjust route as needed
+      })
+    } else {
+      if (formData.password !== formData.confirm_password) {
+        alert('Passwords do not match!')
+        return
+      }
+      const { confirm_password, ...payload } = formData
+      dispatch(registerUser(payload)).then((res) => {
+        if (!res.error) navigate('/verify')
+      })
+    }
   }
 
   return (
     <div className="auth-page">
-      <div className="auth-container">
+      <div className={`auth-container ${mode}`}>
 
         {/* ── LEFT: Image Card ── */}
         <div className="auth-image-card">
@@ -202,8 +219,14 @@ export default function AuthPage() {
               </div>
             )}
 
-            <button type="submit" className="auth-submit">
-              {mode === 'signin' ? 'Sign In' : 'Create Account'}
+            {error && (
+              <div className="auth-error" style={{ color: '#ff4c4c', fontSize: '0.86rem', marginTop: '8px', fontWeight: '500' }}>
+                {error}
+              </div>
+            )}
+
+            <button type="submit" className="auth-submit" disabled={status === 'loading'}>
+              {status === 'loading' ? 'Loading...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
             </button>
           </form>
 
