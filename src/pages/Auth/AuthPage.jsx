@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { registerUser, loginUser } from '../../features/auth/authSlice'
+import { registerUser, loginUser, clearError } from '../../features/auth/authSlice'
 import tournamentPoster from '../../assets/tournament-poster.png'
 import './AuthPage.scss'
 
@@ -12,16 +12,23 @@ export default function AuthPage() {
   const [mode, setMode] = useState('signin')
   const [showPassword, setShowPassword] = useState(false)
 
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        dispatch(clearError())
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [error, dispatch])
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
-    username: '',
     email: '',
     country_code: '',
     contact: '',
-    city: '',
     country: '',
-    referal_code: '',
+    dob: '', // Added Date of Birth
     password: '',
     confirm_password: '',
   })
@@ -31,12 +38,23 @@ export default function AuthPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const isFormValid = () => {
+    if (mode === 'signin') {
+      return formData.email.trim() !== '' && formData.password.trim() !== ''
+    } else {
+      // Signup mode: all fields except potentially confirm_password (already checked in submit)
+      // and referral (if we add it).
+      const requiredFields = ['first_name', 'last_name', 'email', 'country_code', 'contact', 'country', 'dob', 'password']
+      return requiredFields.every(field => formData[field]?.trim() !== '')
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
 
     if (mode === 'signin') {
       dispatch(loginUser({ email: formData.email, password: formData.password })).then((res) => {
-        if (!res.error) navigate('/dashboard') // adjust route as needed
+        if (!res.error) navigate('/verify')
       })
     } else {
       if (formData.password !== formData.confirm_password) {
@@ -68,23 +86,7 @@ export default function AuthPage() {
         <div className="auth-form-side">
 
           {/* Logo */}
-          <div className="auth-logo">
-            <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-              <polygon
-                points="15,3 27,25 3,25"
-                stroke="var(--accent-primary)"
-                strokeWidth="2"
-                fill="none"
-                strokeLinejoin="round"
-              />
-              <polygon
-                points="15,9 23,23 7,23"
-                fill="var(--accent-primary)"
-                opacity="0.2"
-              />
-            </svg>
-            <span>ALPHA FUTURES</span>
-          </div>
+
 
           {/* Title */}
           <div className="auth-title">
@@ -120,24 +122,19 @@ export default function AuthPage() {
                 <div className="form-row two-col">
                   <div className="form-group">
                     <label>First Name</label>
-                    <input type="text" name="first_name" placeholder="John" value={formData.first_name} onChange={handleChange} />
+                    <input type="text" name="first_name" placeholder="John" value={formData.first_name} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Last Name</label>
-                    <input type="text" name="last_name" placeholder="Doe" value={formData.last_name} onChange={handleChange} />
+                    <input type="text" name="last_name" placeholder="Doe" value={formData.last_name} onChange={handleChange} required />
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Username</label>
-                  <input type="text" name="username" placeholder="johndoe" value={formData.username} onChange={handleChange} />
                 </div>
               </>
             )}
 
             <div className="form-group">
               <label>Email Address</label>
-              <input type="email" name="email" placeholder="you@utexas.edu" value={formData.email} onChange={handleChange} />
+              <input type="email" name="email" placeholder="you@utexas.edu" value={formData.email} onChange={handleChange} required />
             </div>
 
             {mode === 'signup' && (
@@ -145,28 +142,23 @@ export default function AuthPage() {
                 <div className="form-row code-phone">
                   <div className="form-group">
                     <label>Code</label>
-                    <input type="text" name="country_code" placeholder="+1" value={formData.country_code} onChange={handleChange} />
+                    <input type="text" name="country_code" placeholder="+91" value={formData.country_code} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Phone Number</label>
-                    <input type="tel" name="contact" placeholder="(555) 000-0000" value={formData.contact} onChange={handleChange} />
+                    <input type="tel" name="contact" placeholder="9123423412" value={formData.contact} onChange={handleChange} required />
                   </div>
                 </div>
 
                 <div className="form-row two-col">
                   <div className="form-group">
-                    <label>City</label>
-                    <input type="text" name="city" placeholder="Austin" value={formData.city} onChange={handleChange} />
+                    <label>Country</label>
+                    <input type="text" name="country" placeholder="India" value={formData.country} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
-                    <label>Country</label>
-                    <input type="text" name="country" placeholder="USA" value={formData.country} onChange={handleChange} />
+                    <label>Date of Birth</label>
+                    <input type="date" name="dob" value={formData.dob} onChange={handleChange} required />
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Referral Code</label>
-                  <input type="text" name="referal_code" placeholder="XYZ123 (Optional)" value={formData.referal_code} onChange={handleChange} />
                 </div>
               </>
             )}
@@ -225,7 +217,13 @@ export default function AuthPage() {
               </div>
             )}
 
-            <button type="submit" className="auth-submit" disabled={status === 'loading'}>
+            {!isFormValid() && (
+              <div className="form-hint" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginTop: '12px', textAlign: 'center' }}>
+                Please fill all required fields to continue
+              </div>
+            )}
+
+            <button type="submit" className="auth-submit" disabled={status === 'loading' || !isFormValid()}>
               {status === 'loading' ? 'Loading...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
             </button>
           </form>

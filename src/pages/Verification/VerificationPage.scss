@@ -1,6 +1,5 @@
 // ── Page ───────────────────────────────────────────────────
 .verify-page {
-  min-height: 100vh;
   background:
     radial-gradient(ellipse at 70% 30%, rgba(3, 174, 204, 0.14) 0%, transparent 50%),
     radial-gradient(ellipse at 20% 80%, rgba(3, 174, 204, 0.06) 0%, transparent 40%),
@@ -630,5 +629,44 @@
 
   &:hover:not(:disabled) svg {
     transform: translate(2px, -2px);
+  }
+}
+
+// ── Floating Error Notification ────────────────────────────
+.floating-error-box {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: rgba(26, 26, 26, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 76, 76, 0.3);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ff4c4c;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base);
+  animation: slide-down-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+@keyframes slide-down-fade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }

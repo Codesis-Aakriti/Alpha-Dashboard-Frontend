@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { getKycLink } from '../../features/auth/authSlice'
+import { getKycLink, uploadStudentDoc, clearError } from '../../features/auth/authSlice'
 import './VerificationPage.scss'
 
 const STEPS = [
@@ -15,10 +15,22 @@ const STEPS = [
 function FileUpload({ label, hint, file, onFile }) {
   const ref = useRef()
 
+  const validateFile = (file) => {
+    if (!file) return false
+    const ext = file.name.split('.').pop().toLowerCase()
+    const isAllowedExt = ['jpg', 'jpeg', 'png', 'pdf'].includes(ext)
+    const isAllowedSize = file.size <= 5 * 1024 * 1024 // 5MB
+    return isAllowedExt && isAllowedSize
+  }
+
   const handleDrop = (e) => {
     e.preventDefault()
     const f = e.dataTransfer.files[0]
-    if (f) onFile(f)
+    if (f && validateFile(f)) {
+      onFile(f)
+    } else if (f) {
+      alert('File must be .jpg, .jpeg, .png, or .pdf and under 5MB.')
+    }
   }
 
   return (
@@ -31,9 +43,16 @@ function FileUpload({ label, hint, file, onFile }) {
       <input
         ref={ref}
         type="file"
-        accept="image/*,.pdf"
+        accept=".jpg,.jpeg,.png,.pdf"
         style={{ display: 'none' }}
-        onChange={e => e.target.files[0] && onFile(e.target.files[0])}
+        onChange={e => {
+          const f = e.target.files[0]
+          if (f && validateFile(f)) {
+            onFile(f)
+          } else if (f) {
+            alert('File must be .jpg, .jpeg, .png, or .pdf and under 5MB.')
+          }
+        }}
       />
       {file ? (
         <div className="file-preview">
@@ -68,17 +87,63 @@ function FileUpload({ label, hint, file, onFile }) {
 export default function VerificationPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { status, error } = useSelector((state) => state.auth)
+  const { status, error, user, registrationMessage } = useSelector((state) => state.auth)
 
-  const [step, setStep] = useState(1)
-  const [studentDocType, setStudentDocType] = useState('Student ID card')
+  const [step, setStep] = useState(() => {
+    const saved = localStorage.getItem('verify-step')
+    return saved ? parseInt(saved) : 1
+  })
+  const [studentDocType, setStudentDocType] = useState('id_card') // Default to slug
   const [studentFile, setStudentFile] = useState(null)
+  const [floatingError, setFloatingError] = useState(null)
+  const [kycVerifiedLocally, setKycVerifiedLocally] = useState(() => {
+    return localStorage.getItem('kyc-verified-locally') === 'true'
+  })
+
+  const STUDENT_DOC_OPTIONS = [
+    { label: 'ID Card', value: 'id_card' },
+    { label: 'Bonafide Certificate', value: 'bonafide' },
+    { label: 'Enrollment Letter', value: 'enrollment_letter' },
+  ]
+
+  useEffect(() => {
+    if (error) {
+      setFloatingError(error)
+      const timer = setTimeout(() => {
+        dispatch(clearError())
+        setFloatingError(null)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [error, dispatch])
+
+  useEffect(() => {
+    // 1. If we have a kyb_id, it means Step 2 is definitely done. Go to 3.
+    if (user?.kyb_id && step < 3) {
+      setStep(3)
+    }
+    // 2. If no registration message, they are already verified (email). Skip Step 1.
+    else if (!registrationMessage && step === 1) {
+      setStep(2)
+    }
+  }, [registrationMessage, step, user?.kyb_id])
 
   const totalSteps = 4
-  const goNext = () => setStep(s => Math.min(s + 1, totalSteps))
+  const goNext = () => {
+    const next = Math.min(step + 1, totalSteps)
+    setStep(next)
+    localStorage.setItem('verify-step', next.toString())
+  }
   const goPrev = () => {
-    if (step === 1) navigate('/auth')
-    else setStep(s => s - 1)
+    if (step <= 2) navigate('/auth')
+    else if (step === 3) {
+      setStep(1) // Cannot go back to step 2 after submission
+      localStorage.setItem('verify-step', '1')
+    } else {
+      const prev = step - 1
+      setStep(prev)
+      localStorage.setItem('verify-step', prev.toString())
+    }
   }
 
   const canProceed = () => {
@@ -90,8 +155,35 @@ export default function VerificationPage() {
 
   const handleKycStart = () => {
     dispatch(getKycLink()).then((res) => {
-      if (!res.error && res.payload?.url) {
-        window.open(res.payload.url, '_blank')
+      const msg = res.payload?.detail || res.payload
+      if (!res.error && res.payload?.verification?.url) {
+        window.open(res.payload.verification.url, '_blank')
+      } else if (typeof msg === 'string' && msg.toLowerCase().includes('already verified')) {
+        // If already verified, move to final step
+        setKycVerifiedLocally(true)
+        localStorage.setItem('kyc-verified-locally', 'true')
+        if (msg) {
+          setFloatingError(msg)
+          setTimeout(() => setFloatingError(null), 5000)
+        }
+        goNext()
+      }
+    })
+  }
+
+  const handleStudentSubmit = () => {
+    if (!studentFile) return
+
+    dispatch(uploadStudentDoc({
+      document_type: studentDocType,
+      document: studentFile
+    })).then((res) => {
+      if (!res.error) {
+        goNext()
+      } else if (res.payload === 'Document already under review.') {
+        // If already under review, we can still proceed to KYC
+        // Let the floating error (5s timer) show it
+        goNext()
       }
     })
   }
@@ -100,14 +192,21 @@ export default function VerificationPage() {
     <div className="verify-page">
       <div className="verify-container">
 
+        {/* Floating Error Notification */}
+        {floatingError && (
+          <div className="floating-error-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{floatingError}</span>
+          </div>
+        )}
+
         {/* Logo */}
-        <div className="verify-logo">
-          <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
-            <polygon points="15,3 27,25 3,25" stroke="var(--accent-primary)" strokeWidth="2" fill="none" strokeLinejoin="round" />
-            <polygon points="15,9 23,23 7,23" fill="var(--accent-primary)" opacity="0.2" />
-          </svg>
+        {/* <div className="verify-logo">
+          <img src="/favicon.png" alt="Alpha Futures" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
           <span>ALPHA FUTURES</span>
-        </div>
+        </div> */}
 
         {/* Step Tracker */}
         <div className="step-track">
@@ -138,7 +237,13 @@ export default function VerificationPage() {
                 </svg>
               </div>
               <h2>Verify your email</h2>
-              <p className="step-desc">We sent a verification link to <strong>you@utexas.edu</strong>. Please check your inbox and click the link to continue.</p>
+              <p className="step-desc">
+                {registrationMessage ? (
+                  registrationMessage
+                ) : (
+                  <>We sent a verification link to <strong>{user?.email || 'your email'}</strong>. Please check your inbox and click the link to continue.</>
+                )}
+              </p>
               <button className="resend-link" style={{ marginTop: '24px' }}>Didn&apos;t receive it? <span>Resend email</span></button>
             </div>
           )}
@@ -161,22 +266,22 @@ export default function VerificationPage() {
                 Select and upload any one document from the list below
               </div>
               <div className="doc-options">
-                {['Student ID card', 'Enrollment letter', 'University portal screenshot with name visible'].map(opt => (
+                {STUDENT_DOC_OPTIONS.map(opt => (
                   <div
-                    key={opt}
-                    className={`doc-option ${studentDocType === opt ? 'selected' : ''}`}
-                    onClick={() => setStudentDocType(opt)}
+                    key={opt.value}
+                    className={`doc-option ${studentDocType === opt.value ? 'selected' : ''}`}
+                    onClick={() => setStudentDocType(opt.value)}
                   >
                     <div className="radio-circle">
-                      {studentDocType === opt && <div className="radio-fill" />}
+                      {studentDocType === opt.value && <div className="radio-fill" />}
                     </div>
-                    {opt}
+                    {opt.label}
                   </div>
                 ))}
               </div>
               <FileUpload
                 label="Upload your student document"
-                hint="JPG, PNG or PDF · max 10MB"
+                hint="JPG, JPEG, PNG or PDF · max 5MB"
                 file={studentFile}
                 onFile={setStudentFile}
               />
@@ -214,16 +319,15 @@ export default function VerificationPage() {
                 This will open a secure window to verify your identity.
               </div>
 
-              {error && (
-                <div style={{ color: '#ff4c4c', fontSize: '0.85rem', marginTop: '12px' }}>
-                  {error}
-                </div>
-              )}
+
 
               <button
                 className="resend-link"
                 style={{ marginTop: '20px', fontSize: '0.9rem' }}
-                onClick={() => setStep(4)}
+                onClick={() => {
+                  setStep(4)
+                  localStorage.setItem('verify-step', '4')
+                }}
               >
                 Already completed? <span>Continue to final step</span>
               </button>
@@ -253,7 +357,39 @@ export default function VerificationPage() {
                 {[
                   { label: 'Email verified', done: true },
                   { label: 'Student ID uploaded', done: true },
-                  { label: 'Identity (KYC) pending', done: false },
+                ].map((item, i) => (
+                  <div key={i} className={`pa-check-item ${item.done ? 'done' : 'pending'}`}>
+                    <div className="pa-check-icon">
+                      {item.done ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      ) : (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                        </svg>
+                      )}
+                    </div>
+                    <span>{item.label}</span>
+                    {!item.done && <span className="pa-pending-tag">Pending</span>}
+                  </div>
+                ))}
+                <div className={`pa-check-item ${kycVerifiedLocally ? 'done' : 'pending'}`}>
+                  <div className="pa-check-icon">
+                    {kycVerifiedLocally ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+                      </svg>
+                    )}
+                  </div>
+                  <span>{kycVerifiedLocally ? 'Identity (KYC) verified' : 'Identity (KYC) pending'}</span>
+                  {!kycVerifiedLocally && <span className="pa-pending-tag">Pending</span>}
+                </div>
+                {[
                   { label: 'Manual approval', done: false },
                 ].map((item, i) => (
                   <div key={i} className={`pa-check-item ${item.done ? 'done' : 'pending'}`}>
@@ -287,33 +423,43 @@ export default function VerificationPage() {
 
           {/* Actions */}
           <div className="step-actions">
-            {step < 4 && (
+            {step === 1 && (
               <button className="btn-back" onClick={goPrev}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
-                {step === 1 ? 'Back to Sign In' : 'Back'}
+                Back to Sign In
               </button>
             )}
             {step < 4 && (
-              <button className="btn-next" onClick={goNext} disabled={!canProceed()}>
-                {step === 3 ? 'Submit Application' : 'Continue'}
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+              <button
+                className="btn-next"
+                onClick={step === 2 ? handleStudentSubmit : goNext}
+                disabled={!canProceed() || status === 'loading'}
+              >
+                {status === 'loading' && step === 2 ? 'Uploading...' : step === 3 ? 'Submit Application' : 'Continue'}
+                {status !== 'loading' && (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                )}
               </button>
             )}
             {step === 4 && (
               <>
-                <button className="btn-back" onClick={() => navigate('/auth')}>
+                <button className="btn-back" onClick={() => setStep(3)}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
+                    <polyline points="15 18 9 12 15 6" />
                   </svg>
-                  Sign Out
+                  Back to Identity Verification
                 </button>
-                <button className="btn-next" disabled title="Available once your application is approved">
+                <div style={{ flex: 1 }} />
+                <button
+                  className="btn-next"
+                  disabled
+                  title="Available once your application is approved"
+                  onClick={() => window.location.href = 'https://app.alpha-futures.com/'}
+                >
                   Go to Dashboard
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6" />
