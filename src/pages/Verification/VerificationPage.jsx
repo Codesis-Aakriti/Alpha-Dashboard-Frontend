@@ -154,19 +154,32 @@ export default function VerificationPage() {
   }
 
   const handleKycStart = () => {
+    // Open a blank tab immediately to avoid mobile popup blockers
+    const kycWindow = window.open('', '_blank')
+
     dispatch(getKycLink()).then((res) => {
       const msg = res.payload?.detail || res.payload
       if (!res.error && res.payload?.verification?.url) {
-        window.open(res.payload.verification.url, '_blank')
-      } else if (typeof msg === 'string' && msg.toLowerCase().includes('already verified')) {
-        // If already verified, move to final step
-        setKycVerifiedLocally(true)
-        localStorage.setItem('kyc-verified-locally', 'true')
-        if (msg) {
-          setFloatingError(msg)
-          setTimeout(() => setFloatingError(null), 5000)
+        if (kycWindow) {
+          kycWindow.location.href = res.payload.verification.url
+        } else {
+          // Fallback if window couldn't be opened
+          window.location.href = res.payload.verification.url
         }
-        goNext()
+      } else {
+        // Close the blank tab if there's an error or handled elsewhere
+        if (kycWindow) kycWindow.close()
+
+        if (typeof msg === 'string' && msg.toLowerCase().includes('already verified')) {
+          // If already verified, move to final step
+          setKycVerifiedLocally(true)
+          localStorage.setItem('kyc-verified-locally', 'true')
+          if (msg) {
+            setFloatingError(msg)
+            setTimeout(() => setFloatingError(null), 5000)
+          }
+          goNext()
+        }
       }
     })
   }
