@@ -2,8 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import './PendingApproval.scss'
 
 const SUBMITTED_ITEMS = [
-  { label: 'Email verified', done: true },
-  { label: 'Identity (KYC) uploaded', done: true },
   { label: 'Student ID uploaded', done: true },
   { label: 'Manual approval', done: false },
 ]
@@ -16,8 +14,8 @@ const NEXT_STEPS = [
         <polyline points="22,6 12,13 2,6" />
       </svg>
     ),
-    title: 'Check your email',
-    desc: 'You\'ll receive an approval or follow-up email within 24 hours.',
+    title: 'Wait for approval',
+    desc: 'Our team will review your student document within 24 hours.',
   },
   {
     icon: (

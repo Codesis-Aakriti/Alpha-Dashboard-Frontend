@@ -101,6 +101,30 @@ export const uploadStudentDoc = createAsyncThunk(
     }
 )
 
+export const getKycDecision = createAsyncThunk(
+    'auth/getKycDecision',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/user/veriff/get-decision/')
+            return response.data
+        } catch (error) {
+            return rejectWithValue(extractErrorMessage(error.response?.data) || error.message)
+        }
+    }
+)
+
+export const getStudentDocStatus = createAsyncThunk(
+    'auth/getStudentDocStatus',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await api.get(`/competition/kyb/student/document/status/?user_id=${userId}`)
+            return response.data
+        } catch (error) {
+            return rejectWithValue(extractErrorMessage(error.response?.data) || error.message)
+        }
+    }
+)
+
 const initialState = {
     user: null,
     id: localStorage.getItem('userId') || null,
@@ -111,6 +135,8 @@ const initialState = {
     kycLink: null,
     kyb_id: null,
     kybStatus: null,
+    kycDecision: null,
+    studentDocStatus: null,
     registrationMessage: null,
     error: null,
 }
@@ -172,6 +198,7 @@ const authSlice = createSlice({
                 state.idToken = action.payload.idToken
                 state.refreshToken = action.payload.refreshToken
                 state.uid = action.payload.uid
+                state.registrationMessage = null
 
                 if (action.payload.id) localStorage.setItem('userId', action.payload.id)
                 if (action.payload.idToken) localStorage.setItem('idToken', action.payload.idToken)
@@ -206,6 +233,32 @@ const authSlice = createSlice({
                 state.kybStatus = action.payload.status
             })
             .addCase(uploadStudentDoc.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.payload
+            })
+            // KYC Decision
+            .addCase(getKycDecision.pending, (state) => {
+                state.status = 'loading'
+                state.error = null
+            })
+            .addCase(getKycDecision.fulfilled, (state, action) => {
+                state.status = 'succeeded'
+                state.kycDecision = action.payload
+            })
+            .addCase(getKycDecision.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.payload
+            })
+            // Student Doc Status
+            .addCase(getStudentDocStatus.pending, (state) => {
+                state.status = 'loading'
+                state.error = null
+            })
+            .addCase(getStudentDocStatus.fulfilled, (state, action) => {
+                state.status = 'succeeded'
+                state.studentDocStatus = action.payload
+            })
+            .addCase(getStudentDocStatus.rejected, (state, action) => {
                 state.status = 'failed'
                 state.error = action.payload
             })
