@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Create a configured Axios instance
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'https://backend.alpha-futures.com/',
+    baseURL: import.meta.env.VITE_API_URL || 'https://backend-uat.alpha-futures.com/',
 })
 
 // Optional: Add request interceptor if we need to send the token
