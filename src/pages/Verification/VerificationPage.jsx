@@ -91,6 +91,7 @@ export default function VerificationPage() {
   const [studentDocType, setStudentDocType] = useState('id_card') // Default to slug
   const [studentFile, setStudentFile] = useState(null)
   const [floatingError, setFloatingError] = useState(null)
+  const [isRetrying, setIsRetrying] = useState(false)
 
   const STUDENT_DOC_OPTIONS = [
     { label: 'Student ID Card', value: 'id_card' },
@@ -162,6 +163,7 @@ export default function VerificationPage() {
       document: studentFile
     })).then((res) => {
       if (!res.error) {
+        setIsRetrying(false)
         goNext()
       } else {
         const msg = res.payload
@@ -240,12 +242,12 @@ export default function VerificationPage() {
               <div className="step-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={
                   (studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? 'var(--color-success)' :
-                    studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'var(--color-error, #ff4d4d)' :
+                    (studentDocStatus?.admin_status?.toLowerCase() === 'rejected' && !isRetrying) ? 'var(--color-error, #ff4d4d)' :
                       'var(--accent-primary)'
                 } strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? (
                     <><circle cx="12" cy="12" r="10" /><polyline points="20 6 9 17 4 12" /></>
-                  ) : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? (
+                  ) : (studentDocStatus?.admin_status?.toLowerCase() === 'rejected' && !isRetrying) ? (
                     <><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></>
                   ) : studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? (
                     <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>
@@ -256,7 +258,7 @@ export default function VerificationPage() {
               </div>
               <h2>
                 {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? 'Student Verified' :
-                  studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'Verification Rejected' :
+                  (studentDocStatus?.admin_status?.toLowerCase() === 'rejected' && !isRetrying) ? 'Verification Rejected' :
                     studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? 'Verification Pending' :
                       'Student verification'}
               </h2>
@@ -274,16 +276,17 @@ export default function VerificationPage() {
                     </svg>
                   </button>
                 </>
-              ) : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? (
+              ) : (studentDocStatus?.admin_status?.toLowerCase() === 'rejected' && !isRetrying) ? (
                 <>
                   <p className="step-desc" style={{ color: 'var(--color-error, #ff4d4d)' }}>Your student verification was rejected. Please check your document and try again.</p>
                   <button
                     className="btn-kyc-start"
                     onClick={() => {
                       setStudentFile(null);
+                      setIsRetrying(true);
                       // Optionally we could reset the step if we are on step 2, but step 1 is where upload happens
                     }}
-                    style={{ marginTop: '24px', background: 'var(--accent-primary)' }}
+                    style={{ marginTop: '24px', background: 'var(--accent-primary)', color: "white" }}
                   >
                     Try Again
                   </button>
