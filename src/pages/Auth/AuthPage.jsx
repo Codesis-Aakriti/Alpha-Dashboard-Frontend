@@ -35,6 +35,14 @@ export default function AuthPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
+
+    if (name === 'country_code') {
+      const digits = value.replace(/\D/g, '')
+      const newCode = (digits || value === '+') ? '+' + digits : ''
+      setFormData(prev => ({ ...prev, [name]: newCode }))
+      return
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
