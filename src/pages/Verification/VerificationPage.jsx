@@ -211,18 +211,24 @@ export default function VerificationPage() {
 
         {/* Step Tracker */}
         <div className="step-track">
-          {STEPS.map((s) => (
-            <div key={s.id} className={`step-item ${step > s.id ? 'line-done' : ''}`}>
-              <div className={`step-circle ${step > s.id ? 'done' : step === s.id ? 'active' : ''}`}>
-                {step > s.id ? (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : s.id}
+          {STEPS.map((s) => {
+            const isApproved = studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved';
+            const isDone = isApproved || step > s.id;
+            const isActive = !isApproved && step === s.id;
+
+            return (
+              <div key={s.id} className={`step-item ${isDone ? 'line-done' : ''}`}>
+                <div className={`step-circle ${isDone ? 'done' : isActive ? 'active' : ''}`}>
+                  {isDone ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : s.id}
+                </div>
+                <span className={`step-label ${isActive ? 'active' : ''}`}>{s.short}</span>
               </div>
-              <span className={`step-label ${step === s.id ? 'active' : ''}`}>{s.short}</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Card */}
