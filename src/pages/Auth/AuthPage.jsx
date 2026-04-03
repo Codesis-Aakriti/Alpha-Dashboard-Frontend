@@ -43,6 +43,13 @@ export default function AuthPage() {
       return
     }
 
+    if (name === 'contact') {
+      const digits = value.replace(/\D/g, '')
+      const newContact = digits.slice(0, 10)
+      setFormData(prev => ({ ...prev, [name]: newContact }))
+      return
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
