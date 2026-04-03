@@ -127,7 +127,7 @@ export default function VerificationPage() {
 
     // Only poll if we are in a pending state
     const isPending = status === 'pending' || !status
-    const isFinal = ['approved', 'manually_approved', 'rejected'].includes(status)
+    const isFinal = ['approved', 'manual_approved', 'rejected'].includes(status)
 
     if (userId && (step === 2 || isPending) && !isFinal) {
       const interval = setInterval(() => {
@@ -233,11 +233,11 @@ export default function VerificationPage() {
             <div className="step-content">
               <div className="step-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={
-                  (studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? 'var(--color-success)' :
+                  (studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? 'var(--color-success)' :
                     studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'var(--color-error, #ff4d4d)' :
                       'var(--accent-primary)'
                 } strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? (
+                  {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? (
                     <><circle cx="12" cy="12" r="10" /><polyline points="20 6 9 17 4 12" /></>
                   ) : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? (
                     <><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></>
@@ -249,12 +249,12 @@ export default function VerificationPage() {
                 </svg>
               </div>
               <h2>
-                {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? 'Student Verified' :
+                {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? 'Student Verified' :
                   studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'Verification Rejected' :
                     studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? 'Verification Pending' :
                       'Student verification'}
               </h2>
-              {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? (
+              {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? (
                 <>
                   <p className="step-desc">Your student verification has been approved. You can now access the dashboard.</p>
                   <button
@@ -355,9 +355,9 @@ export default function VerificationPage() {
                   <span>Student ID uploaded</span>
                 </div>
 
-                <div className={`pa-check-item ${(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? 'done' : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'failed' : 'pending'}`}>
+                <div className={`pa-check-item ${(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? 'done' : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'failed' : 'pending'}`}>
                   <div className="pa-check-icon">
-                    {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? (
+                    {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? (
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -372,7 +372,7 @@ export default function VerificationPage() {
                     )}
                   </div>
                   <span>Approved</span>
-                  {(studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'manually_approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'rejected') && <span className="pa-pending-tag">Pending</span>}
+                  {(studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'manual_approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'rejected') && <span className="pa-pending-tag">Pending</span>}
                   {studentDocStatus?.admin_status?.toLowerCase() === 'rejected' && <span className="pa-pending-tag" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d' }}>Rejected</span>}
                 </div>
               </div>
@@ -383,7 +383,7 @@ export default function VerificationPage() {
           <div className="step-actions">
             {step === 1 &&
               studentDocStatus?.admin_status?.toLowerCase() !== 'approved' &&
-              studentDocStatus?.admin_status?.toLowerCase() !== 'manually_approved' && (
+              studentDocStatus?.admin_status?.toLowerCase() !== 'manual_approved' && (
                 <button
                   className="btn-next"
                   onClick={studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? goNext : handleStudentSubmit}
@@ -408,7 +408,7 @@ export default function VerificationPage() {
                 <div style={{ flex: 1 }} />
                 <button
                   className="btn-next"
-                  disabled={studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'manually_approved'}
+                  disabled={studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'manual_approved'}
                   title="Available once your application is approved"
                   onClick={() => window.location.href = 'https://app.alpha-futures.com/'}
                 >
