@@ -120,16 +120,22 @@ export default function VerificationPage() {
 
 
 
-  // Poll status every 10s on step 2
+  // Poll status every 40s on step 2 or when pending
   useEffect(() => {
     const userId = authId || authUid
-    if (step === 2 && userId) {
+    const status = studentDocStatus?.admin_status?.toLowerCase()
+
+    // Only poll if we are in a pending state
+    const isPending = status === 'pending' || !status
+    const isFinal = ['approved', 'manually_approved', 'rejected'].includes(status)
+
+    if (userId && (step === 2 || isPending) && !isFinal) {
       const interval = setInterval(() => {
         dispatch(getStudentDocStatus(userId))
-      }, 10000)
+      }, 120000)
       return () => clearInterval(interval)
     }
-  }, [step, authId, authUid, dispatch])
+  }, [step, studentDocStatus?.admin_status, authId, authUid, dispatch])
 
   const totalSteps = 2
   const goNext = () => {
@@ -165,6 +171,22 @@ export default function VerificationPage() {
         }
       }
     })
+  }
+
+  if (!studentDocStatus && status === 'loading') {
+    return (
+      <div className="verify-page">
+        <div className="verify-loader-container">
+          <div className="verify-loader">
+            <div className="loader-ring" />
+            <div className="loader-logo">
+              <img src="/favicon.png" alt="Logo" />
+            </div>
+          </div>
+          <p>Initializing verification...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -210,16 +232,29 @@ export default function VerificationPage() {
           {step === 1 && (
             <div className="step-content">
               <div className="step-icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={studentDocStatus?.admin_status?.toLowerCase() === 'approved' ? 'var(--color-success)' : 'var(--accent-primary)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  {studentDocStatus?.admin_status?.toLowerCase() === 'approved' ? (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={
+                  (studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? 'var(--color-success)' :
+                    studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'var(--color-error, #ff4d4d)' :
+                      'var(--accent-primary)'
+                } strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? (
                     <><circle cx="12" cy="12" r="10" /><polyline points="20 6 9 17 4 12" /></>
+                  ) : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? (
+                    <><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></>
+                  ) : studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? (
+                    <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>
                   ) : (
                     <><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></>
                   )}
                 </svg>
               </div>
-              <h2>{studentDocStatus?.admin_status?.toLowerCase() === 'approved' ? 'Student Verified' : 'Student verification'}</h2>
-              {studentDocStatus?.admin_status?.toLowerCase() === 'approved' ? (
+              <h2>
+                {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? 'Student Verified' :
+                  studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'Verification Rejected' :
+                    studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? 'Verification Pending' :
+                      'Student verification'}
+              </h2>
+              {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? (
                 <>
                   <p className="step-desc">Your student verification has been approved. You can now access the dashboard.</p>
                   <button
@@ -232,6 +267,30 @@ export default function VerificationPage() {
                       <polyline points="9 18 15 12 9 6" />
                     </svg>
                   </button>
+                </>
+              ) : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? (
+                <>
+                  <p className="step-desc" style={{ color: 'var(--color-error, #ff4d4d)' }}>Your student verification was rejected. Please check your document and try again.</p>
+                  <button
+                    className="btn-kyc-start"
+                    onClick={() => {
+                      setStudentFile(null);
+                      // Optionally we could reset the step if we are on step 2, but step 1 is where upload happens
+                    }}
+                    style={{ marginTop: '24px', background: 'var(--accent-primary)' }}
+                  >
+                    Try Again
+                  </button>
+                </>
+              ) : studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? (
+                <>
+                  <p className="step-desc">Document already uploaded, approval is pending.</p>
+                  <div className="info-note" style={{ marginBottom: '16px', marginTop: 16 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    Our team is reviewing your identity and student verification — typically less than 24 hours.
+                  </div>
                 </>
               ) : (
                 <>
@@ -296,11 +355,15 @@ export default function VerificationPage() {
                   <span>Student ID uploaded</span>
                 </div>
 
-                <div className={`pa-check-item ${studentDocStatus?.admin_status?.toLowerCase() === 'approved' ? 'done' : 'pending'}`}>
+                <div className={`pa-check-item ${(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? 'done' : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'failed' : 'pending'}`}>
                   <div className="pa-check-icon">
-                    {studentDocStatus?.admin_status?.toLowerCase() === 'approved' ? (
+                    {(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manually_approved') ? (
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                       </svg>
                     ) : (
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -308,8 +371,9 @@ export default function VerificationPage() {
                       </svg>
                     )}
                   </div>
-                  <span>Manual approval</span>
-                  {studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && <span className="pa-pending-tag">Pending</span>}
+                  <span>Approved</span>
+                  {(studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'manually_approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'rejected') && <span className="pa-pending-tag">Pending</span>}
+                  {studentDocStatus?.admin_status?.toLowerCase() === 'rejected' && <span className="pa-pending-tag" style={{ background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d' }}>Rejected</span>}
                 </div>
               </div>
             </div>
@@ -317,20 +381,22 @@ export default function VerificationPage() {
 
           {/* Actions */}
           <div className="step-actions">
-            {step === 1 && studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && (
-              <button
-                className="btn-next"
-                onClick={handleStudentSubmit}
-                disabled={!canProceed() || status === 'loading'}
-              >
-                {status === 'loading' ? 'Uploading...' : 'Continue'}
-                {status !== 'loading' && (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                )}
-              </button>
-            )}
+            {step === 1 &&
+              studentDocStatus?.admin_status?.toLowerCase() !== 'approved' &&
+              studentDocStatus?.admin_status?.toLowerCase() !== 'manually_approved' && (
+                <button
+                  className="btn-next"
+                  onClick={studentDocStatus?.admin_status?.toLowerCase() === 'pending' ? goNext : handleStudentSubmit}
+                  disabled={(!canProceed() && studentDocStatus?.admin_status?.toLowerCase() !== 'pending') || status === 'loading'}
+                >
+                  {status === 'loading' ? 'Uploading...' : 'Continue'}
+                  {status !== 'loading' && (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  )}
+                </button>
+              )}
             {step === 2 && (
               <>
                 <button className="btn-back" onClick={() => setStep(1)}>
@@ -342,7 +408,7 @@ export default function VerificationPage() {
                 <div style={{ flex: 1 }} />
                 <button
                   className="btn-next"
-                  disabled={studentDocStatus?.admin_status?.toLowerCase() !== 'approved'}
+                  disabled={studentDocStatus?.admin_status?.toLowerCase() !== 'approved' && studentDocStatus?.admin_status?.toLowerCase() !== 'manually_approved'}
                   title="Available once your application is approved"
                   onClick={() => window.location.href = 'https://app.alpha-futures.com/'}
                 >
@@ -357,6 +423,6 @@ export default function VerificationPage() {
 
         </div>
       </div>
-    </div>
+    </div >
   )
 }
