@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { registerUser, loginUser, clearError } from '../../features/auth/authSlice'
+import { countries } from '../../utils/countries'
 import tournamentPoster from '../../assets/tournament-poster.png'
 import './AuthPage.scss'
+import DatePicker from '../../components/ResuableComponents/DatePicker/DatePicker'
+import Dropdown from '../../components/ResuableComponents/Dropdown/Dropdown'
 
 export default function AuthPage() {
   const navigate = useNavigate()
@@ -25,9 +28,9 @@ export default function AuthPage() {
     first_name: '',
     last_name: '',
     email: '',
-    country_code: '',
+    country_code: '+1',
     contact: '',
-    country: '',
+    country: 'Canada',
     dob: '', // Added Date of Birth
     password: '',
     confirm_password: '',
@@ -35,8 +38,47 @@ export default function AuthPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+
+    // If country code is being changed, try to match it with a country
+    if (name === 'country_code') {
+      // Ensure the value always starts with +
+      let formattedValue = value
+      if (!formattedValue.startsWith('+')) {
+        formattedValue = '+' + formattedValue.replace(/\+/g, '')
+      }
+
+      // Extract just the numbers for matching
+      const cleanedCode = formattedValue.replace(/\+/g, '').trim()
+      const matchedCountry = countries.find(c => c.code === cleanedCode)
+
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedValue,
+        country: matchedCountry ? matchedCountry.country : ''
+      }))
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }))
+    }
   }
+
+  const handleCountryChange = (selectedCountry) => {
+    const countryData = countries.find(c => c.country === selectedCountry)
+    setFormData(prev => ({
+      ...prev,
+      country: selectedCountry,
+      country_code: countryData ? `+${countryData.code}` : ''
+    }))
+  }
+
+  const handleDateChange = (date) => {
+    setFormData(prev => ({ ...prev, dob: date }))
+  }
+
+  // Prepare country options for dropdown
+  const countryOptions = countries.map(c => ({
+    value: c.country,
+    label: c.country
+  }))
 
   const isFormValid = () => {
     if (mode === 'signin') {
@@ -151,14 +193,22 @@ export default function AuthPage() {
                 </div>
 
                 <div className="form-row two-col">
-                  <div className="form-group">
-                    <label>Country</label>
-                    <input type="text" name="country" placeholder="India" value={formData.country} onChange={handleChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label>Date of Birth</label>
-                    <input type="date" name="dob" value={formData.dob} onChange={handleChange} required />
-                  </div>
+                  <Dropdown
+                    label="Country"
+                    options={countryOptions}
+                    value={formData.country}
+                    onChange={handleCountryChange}
+                    placeholder="Select country"
+                    required
+                    searchable
+                  />
+                  <DatePicker
+                    label="Date of Birth"
+                    value={formData.dob}
+                    onChange={handleDateChange}
+                    placeholder="dd-mm-yyyy"
+                    required
+                  />
                 </div>
               </>
             )}
