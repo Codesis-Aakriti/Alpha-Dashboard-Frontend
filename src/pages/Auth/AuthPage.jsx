@@ -142,7 +142,7 @@ export default function AuthPage() {
                 <div className="form-row code-phone">
                   <div className="form-group">
                     <label>Code</label>
-                    <input type="text" name="country_code" placeholder="+91" value={formData.country_code} onChange={handleChange} required />
+                    <input type="text" name="country_code" placeholder="+1" value={formData.country_code} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Phone Number</label>
