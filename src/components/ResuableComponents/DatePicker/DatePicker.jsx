@@ -149,96 +149,98 @@ function DatePicker({
     const days = getDaysInMonth(viewDate)
 
     return (
-        <div className={`datepicker-wrapper ${className}`} ref={pickerRef}>
-            {label && (
-                <label className="datepicker-label">
-                    {label}
-                    {required && <span className="required">*</span>}
-                </label>
-            )}
-
-            <div className="datepicker-container">
-                <button
-                    type="button"
-                    className="datepicker-trigger"
-                    onClick={() => setIsOpen(!isOpen)}
-                >
-                    <span className={selectedDate ? 'selected-text' : 'placeholder-text'}>
-                        {selectedDate ? formatDate(selectedDate) : placeholder}
-                    </span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
-                        <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" strokeWidth="2" />
-                        <line x1="9" y1="2" x2="9" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        <line x1="15" y1="2" x2="15" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                </button>
-
-                {isOpen && (
-                    <div className="datepicker-menu open-upward">
-                        <div className="datepicker-header">
-                            <div className="nav-group">
-                                <button type="button" onClick={handlePrevYear} className="nav-btn" title="Previous Year">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M18 18L12 12L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        <path d="M12 18L6 12L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
-                                <button type="button" onClick={handlePrevMonth} className="nav-btn" title="Previous Month">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <span className="month-year">
-                                {months[viewDate.getMonth()]}, {viewDate.getFullYear()}
-                            </span>
-                            <div className="nav-group">
-                                <button type="button" onClick={handleNextMonth} className="nav-btn" title="Next Month">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
-                                <button type="button" onClick={handleNextYear} className="nav-btn" title="Next Year">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M6 18L12 12L6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        <path d="M12 18L18 12L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="datepicker-calendar">
-                            <div className="weekdays">
-                                {daysOfWeek.map(day => (
-                                    <div key={day} className="weekday">{day}</div>
-                                ))}
-                            </div>
-
-                            <div className="days-grid">
-                                {days.map((dayObj, index) => (
-                                    <button
-                                        key={index}
-                                        type="button"
-                                        className={`day-cell ${!dayObj.isCurrentMonth ? 'other-month' : ''} ${isToday(dayObj.date) ? 'today' : ''} ${isSelected(dayObj.date) ? 'selected' : ''}`}
-                                        onClick={() => dayObj.isCurrentMonth && handleDateSelect(dayObj.date)}
-                                    >
-                                        {dayObj.day}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="datepicker-footer">
-                            <button type="button" onClick={handleClear} className="footer-btn clear-btn">
-                                Clear
-                            </button>
-                            <button type="button" onClick={handleToday} className="footer-btn today-btn">
-                                Today
-                            </button>
-                        </div>
-                    </div>
+        <div className={`custom-datepicker ${className}`}>
+            <div className="datepicker-wrapper" ref={pickerRef}>
+                {label && (
+                    <label className="datepicker-label">
+                        {label}
+                        {required && <span className="required">*</span>}
+                    </label>
                 )}
+
+                <div className="datepicker-container">
+                    <button
+                        type="button"
+                        className="datepicker-trigger"
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        <span className={selectedDate ? 'selected-text' : 'placeholder-text'}>
+                            {selectedDate ? formatDate(selectedDate) : placeholder}
+                        </span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
+                            <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" strokeWidth="2" />
+                            <line x1="9" y1="2" x2="9" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                            <line x1="15" y1="2" x2="15" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                    </button>
+
+                    {isOpen && (
+                        <div className="datepicker-menu open-upward">
+                            <div className="datepicker-header">
+                                <div className="nav-group">
+                                    <button type="button" onClick={handlePrevYear} className="nav-btn" title="Previous Year">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M18 18L12 12L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            <path d="M12 18L6 12L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" onClick={handlePrevMonth} className="nav-btn" title="Previous Month">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span className="month-year">
+                                    {months[viewDate.getMonth()]}, {viewDate.getFullYear()}
+                                </span>
+                                <div className="nav-group">
+                                    <button type="button" onClick={handleNextMonth} className="nav-btn" title="Next Month">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" onClick={handleNextYear} className="nav-btn" title="Next Year">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M6 18L12 12L6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            <path d="M12 18L18 12L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="datepicker-calendar">
+                                <div className="weekdays">
+                                    {daysOfWeek.map(day => (
+                                        <div key={day} className="weekday">{day}</div>
+                                    ))}
+                                </div>
+
+                                <div className="days-grid">
+                                    {days.map((dayObj, index) => (
+                                        <button
+                                            key={index}
+                                            type="button"
+                                            className={`day-cell ${!dayObj.isCurrentMonth ? 'other-month' : ''} ${isToday(dayObj.date) ? 'today' : ''} ${isSelected(dayObj.date) ? 'selected' : ''}`}
+                                            onClick={() => dayObj.isCurrentMonth && handleDateSelect(dayObj.date)}
+                                        >
+                                            {dayObj.day}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="datepicker-footer">
+                                <button type="button" onClick={handleClear} className="footer-btn clear-btn">
+                                    Clear
+                                </button>
+                                <button type="button" onClick={handleToday} className="footer-btn today-btn">
+                                    Today
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     )

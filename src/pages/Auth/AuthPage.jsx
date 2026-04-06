@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { registerUser, loginUser, clearError } from '../../features/auth/authSlice'
 import { countries } from '../../utils/countries'
+import Dropdown from '../../components/ResuableComponents/Dropdown/Dropdown'
+import DatePicker from '../../components/ResuableComponents/DatePicker/DatePicker'
+import Toast from '../../components/ResuableComponents/Toast/Toast'
 import tournamentPoster from '../../assets/tournament-poster.png'
 import './AuthPage.scss'
-import DatePicker from '../../components/ResuableComponents/DatePicker/DatePicker'
-import Dropdown from '../../components/ResuableComponents/Dropdown/Dropdown'
 
 export default function AuthPage() {
   const navigate = useNavigate()
@@ -14,6 +15,7 @@ export default function AuthPage() {
   const { status, error } = useSelector((state) => state.auth)
   const [mode, setMode] = useState('signin')
   const [showPassword, setShowPassword] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     if (error) {
@@ -100,7 +102,7 @@ export default function AuthPage() {
       })
     } else {
       if (formData.password !== formData.confirm_password) {
-        alert('Passwords do not match!')
+        setToast({ message: 'Passwords do not match!', type: 'error' })
         return
       }
       const { confirm_password, ...payload } = formData
@@ -112,6 +114,14 @@ export default function AuthPage() {
 
   return (
     <div className="auth-page">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <div className={`auth-container ${mode}`}>
 
         {/* ── LEFT: Image Card ── */}
@@ -199,7 +209,6 @@ export default function AuthPage() {
                     value={formData.country}
                     onChange={handleCountryChange}
                     placeholder="Select country"
-                    required
                     searchable
                   />
                   <DatePicker
@@ -207,7 +216,6 @@ export default function AuthPage() {
                     value={formData.dob}
                     onChange={handleDateChange}
                     placeholder="dd-mm-yyyy"
-                    required
                   />
                 </div>
               </>
