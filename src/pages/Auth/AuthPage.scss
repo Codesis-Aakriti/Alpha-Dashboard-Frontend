@@ -1,5 +1,38 @@
 // Uses design tokens from _tokens.scss (CSS custom properties)
 
+// ── Global Autofill Override (applies to all inputs in auth page) ──
+.auth-page {
+
+  // Target all inputs with maximum specificity
+  input,
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"] {
+    color: #e8eaed !important;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #e8eaed !important;
+    -webkit-box-shadow: 0 0 0 1000px #131416 inset !important;
+    box-shadow: 0 0 0 1000px #131416 inset !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    caret-color: #e8eaed !important;
+    color: #e8eaed !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  input:-moz-autofill,
+  input:-moz-autofill-preview {
+    filter: none !important;
+    background-color: #131416 !important;
+    color: #e8eaed !important;
+  }
+}
+
 // ── Page ───────────────────────────────────────────────────
 .auth-page {
   min-height: 100vh;
@@ -255,7 +288,7 @@
     background: var(--surface-raised);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     font-size: var(--text-base);
     font-family: var(--font-primary);
     outline: none;
@@ -269,17 +302,28 @@
       border-color: var(--accent-primary);
       box-shadow: 0 0 0 3px var(--accent-primary-subtle);
     }
+  }
 
-    // Override autofill styles
-    &:-webkit-autofill,
-    &:-webkit-autofill:hover,
-    &:-webkit-autofill:focus,
-    &:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 30px var(--surface-raised) inset !important;
-      -webkit-text-fill-color: var(--text-primary) !important;
-      caret-color: var(--text-primary);
-      transition: background-color 5000s ease-in-out 0s;
-    }
+  // Override autofill styles - must be separate for specificity
+  // Note: CSS variables don't work with -webkit-text-fill-color, so we use hex values
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #e8eaed !important;
+    -webkit-box-shadow: 0 0 0 1000px #131416 inset !important;
+    box-shadow: 0 0 0 1000px #131416 inset !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    caret-color: #e8eaed !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  // Firefox autofill
+  input:-moz-autofill,
+  input:-moz-autofill-preview {
+    filter: none !important;
+    background-color: #131416 !important;
+    color: #e8eaed !important;
   }
 }
 

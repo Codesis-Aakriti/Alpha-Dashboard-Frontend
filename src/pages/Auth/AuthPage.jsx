@@ -114,6 +114,16 @@ export default function AuthPage() {
 
   return (
     <div className="auth-page">
+      <style>{`
+        .auth-page input:-webkit-autofill,
+        .auth-page input:-webkit-autofill:hover,
+        .auth-page input:-webkit-autofill:focus,
+        .auth-page input:-webkit-autofill:active {
+          -webkit-text-fill-color: #e8eaed !important;
+          -webkit-box-shadow: 0 0 0 1000px #131416 inset !important;
+          caret-color: #e8eaed !important;
+        }
+      `}</style>
       {toast && (
         <Toast
           message={toast.message}
@@ -174,11 +184,29 @@ export default function AuthPage() {
                 <div className="form-row two-col">
                   <div className="form-group">
                     <label>First Name</label>
-                    <input type="text" name="first_name" placeholder="John" value={formData.first_name} onChange={handleChange} required />
+                    <input
+                      type="text"
+                      name="first_name"
+                      placeholder="John"
+                      value={formData.first_name}
+                      onChange={handleChange}
+                      autoComplete="given-name"
+                      spellCheck="false"
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label>Last Name</label>
-                    <input type="text" name="last_name" placeholder="Doe" value={formData.last_name} onChange={handleChange} required />
+                    <input
+                      type="text"
+                      name="last_name"
+                      placeholder="Doe"
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      autoComplete="family-name"
+                      spellCheck="false"
+                      required
+                    />
                   </div>
                 </div>
               </>
@@ -298,9 +326,9 @@ export default function AuthPage() {
               </>
             )}
           </p>
-        </div>
+        </div >
 
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
