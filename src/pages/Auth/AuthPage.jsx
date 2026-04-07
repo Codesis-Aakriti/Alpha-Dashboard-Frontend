@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { registerUser, loginUser, clearError } from '../../features/auth/authSlice'
 import { countries } from '../../utils/countries'
 import Dropdown from '../../components/ResuableComponents/Dropdown/Dropdown'
-import DatePicker from '../../components/ResuableComponents/DatePicker/DatePicker'
 import Toast from '../../components/ResuableComponents/Toast/Toast'
 import tournamentPoster from '../../assets/tournament-poster.png'
 import './AuthPage.scss'
@@ -32,8 +31,7 @@ export default function AuthPage() {
     email: '',
     country_code: '+1',
     contact: '',
-    country: 'Canada',
-    dob: '', // Added Date of Birth
+    country: 'United States',
     password: '',
     confirm_password: '',
   })
@@ -42,7 +40,10 @@ export default function AuthPage() {
     const { name, value } = e.target
 
     // If country code is being changed, try to match it with a country
-    if (name === 'country_code') {
+    if (name === 'contact') {
+      const numericValue = value.replace(/\D/g, '').slice(0, 10)
+      setFormData(prev => ({ ...prev, [name]: numericValue }))
+    } else if (name === 'country_code') {
       // Ensure the value always starts with +
       let formattedValue = value
       if (!formattedValue.startsWith('+')) {
@@ -72,9 +73,6 @@ export default function AuthPage() {
     }))
   }
 
-  const handleDateChange = (date) => {
-    setFormData(prev => ({ ...prev, dob: date }))
-  }
 
   // Prepare country options for dropdown
   const countryOptions = countries.map(c => ({
@@ -88,7 +86,7 @@ export default function AuthPage() {
     } else {
       // Signup mode: all fields except potentially confirm_password (already checked in submit)
       // and referral (if we add it).
-      const requiredFields = ['first_name', 'last_name', 'email', 'country_code', 'contact', 'country', 'dob', 'password']
+      const requiredFields = ['first_name', 'last_name', 'email', 'country_code', 'contact', 'country', 'password']
       return requiredFields.every(field => formData[field]?.trim() !== '')
     }
   }
@@ -230,22 +228,14 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <div className="form-row two-col">
-                  <Dropdown
-                    label="Country"
-                    options={countryOptions}
-                    value={formData.country}
-                    onChange={handleCountryChange}
-                    placeholder="Select country"
-                    searchable
-                  />
-                  <DatePicker
-                    label="Date of Birth"
-                    value={formData.dob}
-                    onChange={handleDateChange}
-                    placeholder="dd-mm-yyyy"
-                  />
-                </div>
+                <Dropdown
+                  label="Country"
+                  options={countryOptions}
+                  value={formData.country}
+                  onChange={handleCountryChange}
+                  placeholder="Select country"
+                  searchable
+                />
               </>
             )}
 

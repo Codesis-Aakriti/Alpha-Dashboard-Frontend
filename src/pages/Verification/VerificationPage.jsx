@@ -88,14 +88,16 @@ export default function VerificationPage() {
   const { status, error, user } = useSelector((state) => state.auth)
 
   const [step, setStep] = useState(1)
-  const [studentDocType, setStudentDocType] = useState('id_card') // Default to slug
+  const [studentDocType, setStudentDocType] = useState('ut_eid') // Default to UT EID
   const [studentFile, setStudentFile] = useState(null)
+  const [utEidText, setUtEidText] = useState('')
   const [floatingError, setFloatingError] = useState(null)
   const [isRetrying, setIsRetrying] = useState(false)
 
   const STUDENT_DOC_OPTIONS = [
     { label: 'Student ID Card', value: 'id_card' },
     { label: 'Enrollment Letter', value: 'enrollment_letter' },
+    { label: 'UT EID', value: 'ut_eid' },
   ]
 
   useEffect(() => {
@@ -150,18 +152,28 @@ export default function VerificationPage() {
   }
 
   const canProceed = () => {
-    if (step === 1) return !!studentFile
+    if (step === 1) {
+      if (studentDocType === 'ut_eid') return utEidText.trim().length > 0;
+      return !!studentFile
+    }
     return true
   }
 
 
   const handleStudentSubmit = () => {
-    if (!studentFile) return
+    if (studentDocType !== 'ut_eid' && !studentFile) return
 
-    dispatch(uploadStudentDoc({
+    const payload = {
       document_type: studentDocType,
-      document: studentFile
-    })).then((res) => {
+    }
+
+    if (studentDocType === 'ut_eid') {
+      payload.ut_eid = utEidText
+    } else {
+      payload.document = studentFile
+    }
+
+    dispatch(uploadStudentDoc(payload)).then((res) => {
       if (!res.error) {
         setIsRetrying(false)
         goNext()
@@ -324,12 +336,34 @@ export default function VerificationPage() {
                       </div>
                     ))}
                   </div>
-                  <FileUpload
-                    label="Upload your student document"
-                    hint="JPG, JPEG, PNG or PDF · max 5MB"
-                    file={studentFile}
-                    onFile={setStudentFile}
-                  />
+                  {studentDocType === 'ut_eid' ? (
+                    <div className="form-group" style={{ marginTop: '20px' }}>
+                      <label style={{ display: 'block', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem' }}>Enter UT EID</label>
+                      <input
+                        type="text"
+                        placeholder="Enter your UT EID"
+                        value={utEidText}
+                        onChange={(e) => setUtEidText(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '12px 14px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '8px',
+                          color: 'var(--text-primary)',
+                          outline: 'none',
+                          fontSize: '1rem'
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <FileUpload
+                      label="Upload your student document"
+                      hint="JPG, JPEG, PNG or PDF · max 5MB"
+                      file={studentFile}
+                      onFile={setStudentFile}
+                    />
+                  )}
                 </>
               )}
             </div>
@@ -361,7 +395,11 @@ export default function VerificationPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </div>
-                  <span>Student ID uploaded</span>
+                  <span>
+                    {(studentDocStatus?.document_type || studentDocType) === 'ut_eid' ? 'UT EID submitted' :
+                      (studentDocStatus?.document_type || studentDocType) === 'enrollment_letter' ? 'Enrollment Letter uploaded' :
+                        'Student ID uploaded'}
+                  </span>
                 </div>
 
                 <div className={`pa-check-item ${(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? 'done' : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'failed' : 'pending'}`}>
