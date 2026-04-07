@@ -228,16 +228,14 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <div className="form-row two-col">
-                  <Dropdown
-                    label="Country"
-                    options={countryOptions}
-                    value={formData.country}
-                    onChange={handleCountryChange}
-                    placeholder="Select country"
-                    searchable
-                  />
-                </div>
+                <Dropdown
+                  label="Country"
+                  options={countryOptions}
+                  value={formData.country}
+                  onChange={handleCountryChange}
+                  placeholder="Select country"
+                  searchable
+                />
               </>
             )}
 

@@ -88,7 +88,7 @@ export default function VerificationPage() {
   const { status, error, user } = useSelector((state) => state.auth)
 
   const [step, setStep] = useState(1)
-  const [studentDocType, setStudentDocType] = useState('id_card') // Default to slug
+  const [studentDocType, setStudentDocType] = useState('ut_eid') // Default to UT EID
   const [studentFile, setStudentFile] = useState(null)
   const [utEidText, setUtEidText] = useState('')
   const [floatingError, setFloatingError] = useState(null)
@@ -163,11 +163,17 @@ export default function VerificationPage() {
   const handleStudentSubmit = () => {
     if (studentDocType !== 'ut_eid' && !studentFile) return
 
-    dispatch(uploadStudentDoc({
+    const payload = {
       document_type: studentDocType,
-      document: studentFile,
-      ut_eid: utEidText
-    })).then((res) => {
+    }
+
+    if (studentDocType === 'ut_eid') {
+      payload.ut_eid = utEidText
+    } else {
+      payload.document = studentFile
+    }
+
+    dispatch(uploadStudentDoc(payload)).then((res) => {
       if (!res.error) {
         setIsRetrying(false)
         goNext()
@@ -389,7 +395,11 @@ export default function VerificationPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </div>
-                  <span>Student ID uploaded</span>
+                  <span>
+                    {(studentDocStatus?.document_type || studentDocType) === 'ut_eid' ? 'UT EID submitted' :
+                      (studentDocStatus?.document_type || studentDocType) === 'enrollment_letter' ? 'Enrollment Letter uploaded' :
+                        'Student ID uploaded'}
+                  </span>
                 </div>
 
                 <div className={`pa-check-item ${(studentDocStatus?.admin_status?.toLowerCase() === 'approved' || studentDocStatus?.admin_status?.toLowerCase() === 'manual_approved') ? 'done' : studentDocStatus?.admin_status?.toLowerCase() === 'rejected' ? 'failed' : 'pending'}`}>

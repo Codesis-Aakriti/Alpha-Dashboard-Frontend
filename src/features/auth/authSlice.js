@@ -76,16 +76,16 @@ export const getKycLink = createAsyncThunk(
 
 export const uploadStudentDoc = createAsyncThunk(
     'auth/uploadStudentDoc',
-    async ({ document_type, document, ut_eid }, { getState, rejectWithValue }) => {
+    async (params, { getState, rejectWithValue }) => {
         try {
             const state = getState()
-            const userId = state.auth.id
-
+            const userId = parseInt(state.auth.id, 10)
+            const { document_type, document, ut_eid } = params
             if (document_type === 'ut_eid') {
                 const payload = {
+                    user: userId,
                     document_type,
-                    ut_eid,
-                    user: userId
+                    ut_eid
                 }
                 const response = await api.post('/competition/kyb/student/upload/', payload)
                 return response.data
