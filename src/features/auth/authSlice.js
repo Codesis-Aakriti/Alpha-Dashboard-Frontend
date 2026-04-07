@@ -76,25 +76,36 @@ export const getKycLink = createAsyncThunk(
 
 export const uploadStudentDoc = createAsyncThunk(
     'auth/uploadStudentDoc',
-    async ({ document_type, document }, { getState, rejectWithValue }) => {
+    async ({ document_type, document, ut_eid }, { getState, rejectWithValue }) => {
         try {
-            const formData = new FormData()
-            formData.append('document_type', document_type)
-            formData.append('document', document)
-
-            // Getting numeric ID from state
             const state = getState()
             const userId = state.auth.id
-            if (userId) {
-                formData.append('user', userId)
-            }
 
-            const response = await api.post('/competition/kyb/student/upload/', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            })
-            return response.data
+            if (document_type === 'ut_eid') {
+                const payload = {
+                    document_type,
+                    ut_eid,
+                    user: userId
+                }
+                const response = await api.post('/competition/kyb/student/upload/', payload)
+                return response.data
+            } else {
+                const formData = new FormData()
+                formData.append('document_type', document_type)
+                if (document) {
+                    formData.append('document', document)
+                }
+                if (userId) {
+                    formData.append('user', userId)
+                }
+
+                const response = await api.post('/competition/kyb/student/upload/', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                })
+                return response.data
+            }
         } catch (error) {
             return rejectWithValue(extractErrorMessage(error.response?.data) || error.message)
         }

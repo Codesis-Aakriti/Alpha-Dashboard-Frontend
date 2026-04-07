@@ -25,10 +25,9 @@ export default function AuthPage() {
     first_name: '',
     last_name: '',
     email: '',
-    country_code: '',
+    country_code: '+1',
     contact: '',
-    country: '',
-    dob: '', // Added Date of Birth
+    country: 'United States',
     password: '',
     confirm_password: '',
   })
@@ -59,7 +58,7 @@ export default function AuthPage() {
     } else {
       // Signup mode: all fields except potentially confirm_password (already checked in submit)
       // and referral (if we add it).
-      const requiredFields = ['first_name', 'last_name', 'email', 'country_code', 'contact', 'country', 'dob', 'password']
+      const requiredFields = ['first_name', 'last_name', 'email', 'country_code', 'contact', 'country', 'password']
       return requiredFields.every(field => formData[field]?.trim() !== '')
     }
   }
@@ -156,7 +155,7 @@ export default function AuthPage() {
               <>
                 <div className="form-row code-phone">
                   <div className="form-group">
-                    <label>Code</label>
+                    <label>Country Code</label>
                     <input type="text" name="country_code" placeholder="+91" value={formData.country_code} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
@@ -166,13 +165,9 @@ export default function AuthPage() {
                 </div>
 
                 <div className="form-row two-col">
-                  <div className="form-group">
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
                     <label>Country</label>
-                    <input type="text" name="country" placeholder="India" value={formData.country} onChange={handleChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label>Date of Birth</label>
-                    <input type="date" name="dob" value={formData.dob} onChange={handleChange} required />
+                    <input type="text" name="country" placeholder="United States" value={formData.country} onChange={handleChange} required />
                   </div>
                 </div>
               </>
