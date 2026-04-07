@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { registerUser, loginUser, clearError } from '../../features/auth/authSlice'
+import { countries } from '../../utils/countries'
+import Dropdown from '../../components/ResuableComponents/Dropdown/Dropdown'
+import DatePicker from '../../components/ResuableComponents/DatePicker/DatePicker'
+import Toast from '../../components/ResuableComponents/Toast/Toast'
 import tournamentPoster from '../../assets/tournament-poster.png'
 import './AuthPage.scss'
 
@@ -11,6 +15,7 @@ export default function AuthPage() {
   const { status, error } = useSelector((state) => state.auth)
   const [mode, setMode] = useState('signin')
   const [showPassword, setShowPassword] = useState(false)
+  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     if (error) {
@@ -35,22 +40,46 @@ export default function AuthPage() {
   const handleChange = (e) => {
     const { name, value } = e.target
 
+    // If country code is being changed, try to match it with a country
     if (name === 'country_code') {
-      const digits = value.replace(/\D/g, '')
-      const newCode = (digits || value === '+') ? '+' + digits : ''
-      setFormData(prev => ({ ...prev, [name]: newCode }))
-      return
-    }
+      // Ensure the value always starts with +
+      let formattedValue = value
+      if (!formattedValue.startsWith('+')) {
+        formattedValue = '+' + formattedValue.replace(/\+/g, '')
+      }
 
-    if (name === 'contact') {
-      const digits = value.replace(/\D/g, '')
-      const newContact = digits.slice(0, 10)
-      setFormData(prev => ({ ...prev, [name]: newContact }))
-      return
-    }
+      // Extract just the numbers for matching
+      const cleanedCode = formattedValue.replace(/\+/g, '').trim()
+      const matchedCountry = countries.find(c => c.code === cleanedCode)
 
-    setFormData(prev => ({ ...prev, [name]: value }))
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedValue,
+        country: matchedCountry ? matchedCountry.country : ''
+      }))
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }))
+    }
   }
+
+  const handleCountryChange = (selectedCountry) => {
+    const countryData = countries.find(c => c.country === selectedCountry)
+    setFormData(prev => ({
+      ...prev,
+      country: selectedCountry,
+      country_code: countryData ? `+${countryData.code}` : ''
+    }))
+  }
+
+  const handleDateChange = (date) => {
+    setFormData(prev => ({ ...prev, dob: date }))
+  }
+
+  // Prepare country options for dropdown
+  const countryOptions = countries.map(c => ({
+    value: c.country,
+    label: c.country
+  }))
 
   const isFormValid = () => {
     if (mode === 'signin') {
@@ -72,7 +101,7 @@ export default function AuthPage() {
       })
     } else {
       if (formData.password !== formData.confirm_password) {
-        alert('Passwords do not match!')
+        setToast({ message: 'Passwords do not match!', type: 'error' })
         return
       }
       const { confirm_password, ...payload } = formData
@@ -84,6 +113,24 @@ export default function AuthPage() {
 
   return (
     <div className="auth-page">
+      <style>{`
+        .auth-page input:-webkit-autofill,
+        .auth-page input:-webkit-autofill:hover,
+        .auth-page input:-webkit-autofill:focus,
+        .auth-page input:-webkit-autofill:active {
+          -webkit-text-fill-color: #e8eaed !important;
+          -webkit-box-shadow: 0 0 0 1000px #131416 inset !important;
+          caret-color: #e8eaed !important;
+        }
+      `}</style>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <div className={`auth-container ${mode}`}>
 
         {/* ── LEFT: Image Card ── */}
@@ -136,11 +183,29 @@ export default function AuthPage() {
                 <div className="form-row two-col">
                   <div className="form-group">
                     <label>First Name</label>
-                    <input type="text" name="first_name" placeholder="John" value={formData.first_name} onChange={handleChange} required />
+                    <input
+                      type="text"
+                      name="first_name"
+                      placeholder="John"
+                      value={formData.first_name}
+                      onChange={handleChange}
+                      autoComplete="given-name"
+                      spellCheck="false"
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label>Last Name</label>
-                    <input type="text" name="last_name" placeholder="Doe" value={formData.last_name} onChange={handleChange} required />
+                    <input
+                      type="text"
+                      name="last_name"
+                      placeholder="Doe"
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      autoComplete="family-name"
+                      spellCheck="false"
+                      required
+                    />
                   </div>
                 </div>
               </>
@@ -155,8 +220,8 @@ export default function AuthPage() {
               <>
                 <div className="form-row code-phone">
                   <div className="form-group">
-                    <label>Country Code</label>
-                    <input type="text" name="country_code" placeholder="+91" value={formData.country_code} onChange={handleChange} required />
+                    <label>Code</label>
+                    <input type="text" name="country_code" placeholder="+1" value={formData.country_code} onChange={handleChange} required />
                   </div>
                   <div className="form-group">
                     <label>Phone Number</label>
@@ -165,10 +230,20 @@ export default function AuthPage() {
                 </div>
 
                 <div className="form-row two-col">
-                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                    <label>Country</label>
-                    <input type="text" name="country" placeholder="United States" value={formData.country} onChange={handleChange} required />
-                  </div>
+                  <Dropdown
+                    label="Country"
+                    options={countryOptions}
+                    value={formData.country}
+                    onChange={handleCountryChange}
+                    placeholder="Select country"
+                    searchable
+                  />
+                  <DatePicker
+                    label="Date of Birth"
+                    value={formData.dob}
+                    onChange={handleDateChange}
+                    placeholder="dd-mm-yyyy"
+                  />
                 </div>
               </>
             )}
@@ -250,9 +325,9 @@ export default function AuthPage() {
               </>
             )}
           </p>
-        </div>
+        </div >
 
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
