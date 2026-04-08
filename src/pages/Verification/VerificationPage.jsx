@@ -95,8 +95,8 @@ export default function VerificationPage() {
   const [isRetrying, setIsRetrying] = useState(false)
 
   const STUDENT_DOC_OPTIONS = [
-    { label: 'Student ID Card', value: 'id_card' },
-    { label: 'Enrollment Letter', value: 'enrollment_letter' },
+    // { label: 'Student ID Card', value: 'id_card' },
+    // { label: 'Enrollment Letter', value: 'enrollment_letter' },
     { label: 'UT EID', value: 'ut_eid' },
   ]
 
@@ -316,12 +316,12 @@ export default function VerificationPage() {
               ) : (
                 <>
                   <p className="step-desc">Confirm your active enrollment at <strong>University of Texas at Austin</strong>.</p>
-                  <div className="info-note" style={{ marginBottom: '16px', marginTop: 0 }}>
+                  {/* <div className="info-note" style={{ marginBottom: '16px', marginTop: 0 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                     </svg>
                     Select and upload any one document from the list below
-                  </div>
+                  </div> */}
                   <div className="doc-options">
                     {STUDENT_DOC_OPTIONS.map(opt => (
                       <div
